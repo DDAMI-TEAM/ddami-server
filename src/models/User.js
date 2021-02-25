@@ -11,7 +11,6 @@ const UserSchema = new mongoose.Schema({
     type: String,
     enum: ["male", "female"],
   },
-  likeField: [{ type: String }],
   follow: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
   follower: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
   followerCount: { type: Number, default: 0 },
