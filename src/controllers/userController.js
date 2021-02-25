@@ -319,8 +319,9 @@ export const authStudent = async (req, res) => {
   let {
     body: { university, department, number, likeField },
   } = req;
+  //학생증 업로드 후 경로 가져오기
   const imageUrl = req.file.location || "";
-  if (!university || !department || !number) {
+  if (!university || !department || !number || !imageUrl) {
     console.log('필요한 값이 없습니다.');
     return res
       .status(statusCode.BAD_REQUEST)
