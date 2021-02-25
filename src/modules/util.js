@@ -7,7 +7,7 @@ const util = {
   }),
   fail: (status, message, data) => ({
     status,
-    retult: 0,
+    result: 0,
     message,
     data
   }),

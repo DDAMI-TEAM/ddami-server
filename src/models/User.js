@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 const UserSchema = new mongoose.Schema({
   userId: { type: String, required: true, trim: true, unique: true },
   userPassword: { type: String, required: true },
+  salt: { type: String, required: true },
   userName: { type: String },
   userBirth: { type: String },
   userPhone: { type: String },
@@ -21,7 +22,7 @@ const UserSchema = new mongoose.Schema({
   likeMaterial: [{ type: mongoose.Schema.Types.ObjectId, ref: "Material" }],
   imageUrl: {
     type: String,
-    default: "http://222.251.129.150/uploads/default.jpg",
+    default: "https://ddami.s3.ap-northeast-2.amazonaws.com/default.jpg",
   },
   stateMessage: {
     type: String,
