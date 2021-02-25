@@ -20,15 +20,27 @@ export const checkUserId = async (req, res) => {
   const {
     body: { userId },
   } = req;
-  const user = await User.findOne({ userId });
-  if (user === null) {
+  if (!userId) {
     return res
-    .status(statusCode.OK)
-    .send(util.success(statusCode.OK, "사용 가능한 ID입니다."));
-  } else {
+      .status(statusCode.BAD_REQUEST)
+      .send(util.fail(statusCode.BAD_REQUEST, responseMessage.NULL_VALUE));
+  }
+  try {
+    const user = await User.findOne({ userId });
+    if (user === null) {
+      return res
+      .status(statusCode.OK)
+      .send(util.success(statusCode.OK, "사용 가능한 ID입니다."));
+    } else {
+      return res
+      .status(statusCode.OK)
+      .send(util.fail(statusCode.OK, responseMessage.ALREADY_ID));
+    }
+  } catch (err) {
+    console.log(err);
     return res
-    .status(statusCode.BAD_REQUEST)
-    .send(util.fail(statusCode.BAD_REQUEST, responseMessage.ALREADY_ID));
+      .status(statusCode.INTERNAL_SERVER_ERROR)
+      .send(util.fail(statusCode.INTERNAL_SERVER_ERROR, responseMessage.INTERNAL_SERVER_ERROR));
   }
 };
 export const postAuth = async (req, res) => {
