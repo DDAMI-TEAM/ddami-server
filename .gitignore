@@ -78,3 +78,4 @@ package-lock.json
 uploads
 static
 build
+config/
