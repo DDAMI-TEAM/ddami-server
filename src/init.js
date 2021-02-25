@@ -6,4 +6,4 @@ dotenv.config();
 
 const handleListening = () => console.log(`Server run`);
 
-app.listen(process.env.PORT || 5800, handleListening);
+app.listen(process.env.PORT || 3000, handleListening);
