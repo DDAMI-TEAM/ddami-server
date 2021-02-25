@@ -8,6 +8,7 @@ import jwt from "jsonwebtoken";
 import responseMessage from "../modules/responseMessage"
 import statusCode from "../modules/statusCode"
 import util from "../modules/util"
+import crypto from "crypto"
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -75,9 +76,12 @@ export const postJoin = async (req, res) => {
         .status(statusCode.OK)
         .send(util.fail(statusCode.OK, responseMessage.ALREADY_ID));
     } else {
+      const salt = crypto.randomBytes(64).toString('base64');
+      const hashedPassword = crypto.pbkdf2Sync(userPassword, salt, 10000, 64, 'sha512').toString('base64');
       const user = await User({
         userId,
-        userPassword,
+        userPassword: hashedPassword,
+        salt,
         userName,
         userSex,
         userBirth,
@@ -100,68 +104,83 @@ export const postJoin = async (req, res) => {
 
 export const postLogin = async (req, res) => {
   if (!req.decoded) {
-    const {
-      body: { userId, userPassword, deviceToken },
-    } = req;
+    const { userId, userPassword, deviceToken } = req.body;
+    if (!userId || !userPassword) {
+      console.log('필요한 값이 없습니다.');
+      return res
+        .status(statusCode.BAD_REQUEST)
+        .send(util.fail(statusCode.BAD_REQUEST, responseMessage.NULL_VALUE));
+    }
     //SERCRET
     const secret = req.app.get("jwt-secret");
-    const user = await User.findOne({ userId });
-    console.log(req);
-    if (user) {
-      if (user.userId === userId && user.userPassword === userPassword) {
-        //토큰 발급
-        jwt.sign(
-          {
-            _id: user._id,
-            userId: user.userId,
-          },
-          secret,
-          {
-            expiresIn: "7d", //만료기간
-            issuer: "ddami.com",
-            subject: "userInfo",
-          },
-          (err, token) => {
-            if (!err) {
-              console.log("로그인 성공");
-              if (checkAndroid(req)) {
-                if (user.deviceToken) {
-                  if (user.deviceToken !== deviceToken) {
+    try {
+      const user = await User.findOne({ userId });
+      if (user) {
+        const salt = user.salt;
+        const hashedPassword = crypto.pbkdf2Sync(userPassword, salt, 10000, 64, 'sha512').toString('base64');
+        if (user.userId === userId && user.userPassword === hashedPassword) {
+          //토큰 발급
+          jwt.sign(
+            {
+              _id: user._id,
+              userId: user.userId,
+            },
+            secret,
+            {
+              expiresIn: "7d", //만료기간
+              issuer: "ddami.com",
+              subject: "userInfo",
+            },
+            (err, token) => {
+              if (!err) {
+                console.log("로그인 성공");
+                if (checkAndroid(req)) {
+                  if (user.deviceToken) {
+                    if (user.deviceToken !== deviceToken) {
+                      user.deviceToken = deviceToken;
+  
+                      user.save((e) => {
+                        if (!e) {
+                          console.log("디바이스 토큰 변경 완료");
+                        }
+                      });
+                    }
+                  } else {
                     user.deviceToken = deviceToken;
-
                     user.save((e) => {
                       if (!e) {
-                        console.log("디바이스 토큰 변경 완료");
+                        console.log("디바이스 토큰 생성 완료");
                       }
                     });
                   }
-                } else {
-                  user.deviceToken = deviceToken;
-                  user.save((e) => {
-                    if (!e) {
-                      console.log("디바이스 토큰 생성 완료");
-                    }
-                  });
                 }
+                const data = {};
+                data.token = token;
+                return res
+                  .status(statusCode.OK)
+                  .send(util.success(statusCode.OK, `${userId}로 로그인 성공`, data));
               }
-              res.json({
-                result: 0,
-                message: `${userId}로 로그인 성공`,
-                token,
-              });
             }
-          }
-        );
-      } else {
-        res.json({
-          result: 0,
-          message: "로그인 실패. ID/PW를 확인해주세요",
-        });
+          );
+        } else {
+          return res
+            .status(statusCode.OK)
+            .send(util.fail(statusCode.OK, responseMessage.MISS_MATCH_PW));
+        }
       }
+      return res
+      .status(statusCode.OK)
+      .send(util.fail(statusCode.oK, "존재하지 않는 ID입니다."));
+    } catch (err) {
+      console.log(err)
+      return res
+        .status(statusCode.INTERNAL_SERVER_ERROR)
+        .send(util.fail(statusCode.INTERNAL_SERVER_ERROR, responseMessage.INTERNAL_SERVER_ERROR));
     }
   } else {
-    console.log(req.user);
-    res.status(200).json({ result: 1, message: "자동 로그인 성공" });
+    return res
+      .status(statusCode.OK)
+      .send(util.success(statusCode.OK, `${req.decoded.userId}로 자동로그인 성공`));
   }
 };
 

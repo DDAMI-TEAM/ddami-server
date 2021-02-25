@@ -18,11 +18,11 @@ import {
 } from "../controllers/userController";
 
 import { multerImage } from "../multerMiddleware";
-import { checkUser } from "../jwtMiddleware";
+import { jwtMiddleware, checkUser } from "../jwtMiddleware";
 const userRouter = express.Router();
 
 userRouter.post("/join", postJoin);
-userRouter.post("/login", postLogin);
+userRouter.post("/login", jwtMiddleware, postLogin);
 userRouter.post("/detail/:id", postUserDetail);
 userRouter.get("/detail/:id", postUserDetail);
 userRouter.post("/write/comment/:id", postUploadComment);
