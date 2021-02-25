@@ -174,15 +174,16 @@ export const postLogin = async (req, res) => {
               }
             }
           );
-        } else {
+        } else { // 비밀번호가 틀린 경우
           return res
             .status(statusCode.OK)
             .send(util.fail(statusCode.OK, responseMessage.MISS_MATCH_PW));
         }
+      } else { // user가 Null 일 경우
+        return res
+        .status(statusCode.OK)
+        .send(util.success(statusCode.OK, "존재하지 않는 ID입니다."));
       }
-      return res
-      .status(statusCode.OK)
-      .send(util.fail(statusCode.oK, "존재하지 않는 ID입니다."));
     } catch (err) {
       console.log(err)
       return res
@@ -318,11 +319,20 @@ export const authStudent = async (req, res) => {
   let {
     body: { university, department, number, likeField },
   } = req;
+  const imageUrl = req.file.location || "";
+  if (!university || !department || !number) {
+    console.log('필요한 값이 없습니다.');
+    return res
+      .status(statusCode.BAD_REQUEST)
+      .send(util.fail(statusCode.BAD_REQUEST, responseMessage.NULL_VALUE));
+  }
   const user = await User.findById(req.decoded._id);
   if (user === null) {
-  } else if (user.state === true)
-    res.json({ result: 0, message: "이미 인증된 사용자입니다." });
-  else {
+  } else if (user.state === true) { //이미 인증된 사용자
+    return res
+      .status(statusCode.OK)
+      .send(util.fail(statusCode.OK, "이미 인증된 사용자입니다."));
+  } else { // 인증 시작
     try {
       if (!likeField) likeField = [];
       const student = await Student({
@@ -330,28 +340,30 @@ export const authStudent = async (req, res) => {
         university,
         department,
         number,
-        authImage: req.file
-          ? `${process.env.BASE_URL}/uploads/${req.file.filename}`
-          : "",
+        authImage: imageUrl
       });
       await Student.create(student);
 
       user.state = true;
       user.likeField = likeField;
-      // user.likeField.concat(
-      //   likeField.filter((e) => user.likeField.indexOf(e) == -1)
-      // );
-      console.log(user);
+      
       await user.save((err) => {
-        if (!err) res.json({ result: 1, message: "미대생 인증 되었습니다." });
-        else {
+        if (!err) {
+          return res
+            .status(statusCode.OK)
+            .send(util.success(statusCode.OK, '미대생 인증 되었습니다.'));
+        } else {
           console.log(err);
-          res.json({ result: 0, message: "DB 오류" });
+          return res
+            .status(statusCode.INTERNAL_SERVER_ERROR)
+            .send(util.fail(statusCode.INTERNAL_SERVER_ERROR, responseMessage.INTERNAL_SERVER_ERROR));
         }
       });
     } catch (err) {
       console.log(err);
-      res.status(500).json({ result: 0, message: "DB 오류" });
+      return res
+        .status(statusCode.INTERNAL_SERVER_ERROR)
+        .send(util.fail(statusCode.INTERNAL_SERVER_ERROR, responseMessage.INTERNAL_SERVER_ERROR));
     }
   }
 };

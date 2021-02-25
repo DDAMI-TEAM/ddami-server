@@ -45,6 +45,7 @@ userRouter.post("/mylikes", checkUser, postMyLikes);
 userRouter.post("/like/products", checkUser, postLikeProducts);
 userRouter.post(
   "/auth/student",
+  jwtMiddleware,
   checkUser,
   multerImage.single("img"),
   authStudent
