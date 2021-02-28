@@ -143,7 +143,7 @@ export const postLogin = async (req, res) => {
               issuer: "ddami.com",
               subject: "userInfo",
             },
-            (err, token) => {
+            async (err, token) => {
               if (!err) {
                 console.log("로그인 성공");
                 if (checkAndroid(req)) {
@@ -170,7 +170,7 @@ export const postLogin = async (req, res) => {
                 data.token = token;
                 data.isStudent = user.state;
                 if(data.isStudent) {
-                  const student = await Student.findOne({ user: user._id });
+                  const student = await Student.findOne({ user: user._id }, 'department');
                   data.department = student.department;
                 }
                 return res
@@ -202,7 +202,7 @@ export const postLogin = async (req, res) => {
       const data = {};
       data.isStudent = user.state;
       if(data.isStudent) {
-        const student = await Student.findOne({ user: _id });
+        const student = await Student.findOne({ user: _id }, 'department');
         data.department = student.department;
       }
       return res
