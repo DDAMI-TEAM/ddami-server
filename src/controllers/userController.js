@@ -168,6 +168,8 @@ export const postLogin = async (req, res) => {
                 }
                 const data = {};
                 data.token = token;
+                data.userName = user.userName;
+                data.profileUrl = user.imageUrl;
                 data.isStudent = user.state;
                 if(data.isStudent) {
                   const student = await Student.findOne({ user: user._id }, 'department');
@@ -200,6 +202,8 @@ export const postLogin = async (req, res) => {
     try {
       const user = await User.findOne({ _id });
       const data = {};
+      data.userName = user.userName;
+      data.profileUrl = user.imageUrl;
       data.isStudent = user.state;
       if(data.isStudent) {
         const student = await Student.findOne({ user: _id }, 'department');
