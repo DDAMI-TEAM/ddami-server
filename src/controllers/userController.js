@@ -143,7 +143,7 @@ export const postLogin = async (req, res) => {
               issuer: "ddami.com",
               subject: "userInfo",
             },
-            (err, token) => {
+            async (err, token) => {
               if (!err) {
                 console.log("로그인 성공");
                 if (checkAndroid(req)) {
@@ -168,6 +168,11 @@ export const postLogin = async (req, res) => {
                 }
                 const data = {};
                 data.token = token;
+                data.isStudent = user.state;
+                if(data.isStudent) {
+                  const student = await Student.findOne({ user: user._id }, 'department');
+                  data.department = student.department;
+                }
                 return res
                   .status(statusCode.OK)
                   .send(util.success(statusCode.OK, `${userId}로 로그인 성공`, data));
@@ -191,9 +196,24 @@ export const postLogin = async (req, res) => {
         .send(util.fail(statusCode.INTERNAL_SERVER_ERROR, responseMessage.INTERNAL_SERVER_ERROR));
     }
   } else {
-    return res
+    const { _id } = req.decoded;
+    try {
+      const user = await User.findOne({ _id });
+      const data = {};
+      data.isStudent = user.state;
+      if(data.isStudent) {
+        const student = await Student.findOne({ user: _id }, 'department');
+        data.department = student.department;
+      }
+      return res
       .status(statusCode.OK)
-      .send(util.success(statusCode.OK, `${req.decoded.userId}로 자동로그인 성공`));
+      .send(util.success(statusCode.OK, `${req.decoded.userId}로 자동로그인 성공`, data));
+    } catch(err) {
+      console.log(err);
+      return res
+      .status(statusCode.INTERNAL_SERVER_ERROR)
+      .send(util.fail(statusCode.INTERNAL_SERVER_ERROR, responseMessage.INTERNAL_SERVER_ERROR));
+    }
   }
 };
 
