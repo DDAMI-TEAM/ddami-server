@@ -188,8 +188,8 @@ export const postLogin = async (req, res) => {
         }
       } else { // user가 Null 일 경우
         return res
-        .status(statusCode.OK)
-        .send(util.success(statusCode.OK, "존재하지 않는 ID입니다."));
+        .status(403) //권한오류
+        .send(util.success(403, "존재하지 않는 ID입니다."));
       }
     } catch (err) {
       console.log(err)

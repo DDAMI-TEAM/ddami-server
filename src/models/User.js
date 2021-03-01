@@ -5,12 +5,7 @@ const UserSchema = new mongoose.Schema({
   userPassword: { type: String, required: true },
   salt: { type: String, required: true },
   userName: { type: String },
-  userBirth: { type: String },
   userPhone: { type: String },
-  userSex: {
-    type: String,
-    enum: ["male", "female"],
-  },
   follow: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
   follower: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
   followerCount: { type: Number, default: 0 },
