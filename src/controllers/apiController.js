@@ -9,7 +9,73 @@ import User from "../models/User";
 import SearchModel from "../models/Search";
 import dotenv from "dotenv";
 import { Mongoose } from "mongoose";
+import util from "../modules/util";
+import responseMessage from "../modules/responseMessage";
+import statusCode from "../modules/statusCode";
+
 dotenv.config();
+
+// 테스트 필요
+export const getVillage = async (req, res) => {
+  const { _id } = req.decoded;
+  const { sortingBy, filter, start, offset } = req.body;
+  if (!_id) {
+    return res
+      .status(200)
+      .send(util.fail(200, "로그인 먼저 해주세요"));
+  }
+  if (!zortingBy) {
+    console.log('필요한 값이 없습니다.');
+    return res
+      .status(statusCode.BAD_REQUEST)
+      .send(util.fail(statusCode.BAD_REQUEST, responseMessage.NULL_VALUE));
+  }
+  try {
+    const user = await User.findOne({ _id });
+    const data = {};
+    data.imageUrl = user.imageUrl;
+    data.userName - user.userName;
+    let sortedBy = ''
+    if(sortingBy === "L") {
+      //start+1 ~ start+offset 번째 게시물 조회
+      sortedBy='최신순'
+      const posts = await Piece.find({ hasField: {$in: filter} })
+      .select('fileUrl title author likeCnt viewCnt')
+      .populate('author', 'userName imageUrl')
+      .sort('-createdAt')
+      .skip(start).limit(offset);
+    } else if (sortingBy === "P") {
+      sortedBy='인기순'
+      const posts = await Piece.find({ hasField: {$in: filter} })
+      .select('fileUrl title author likeCnt viewCnt')
+      .populate('author', 'userName imageUrl')
+      .sort('likeCnt')
+      .skip(start).limit(offset);
+    } 
+    // else if (sortingBy === "V") {
+    //   const posts = await Piece.find({ hasField: {$in: filter} })
+    //   .select('fileUrl title author likeCnt viewCnt')
+    //   .populate('author', 'userName imageUrl')
+    //   .sort('viewCnt')
+    //   .skip(start).limit(offset);
+    // } 
+    else {
+      return res
+        .status(400)
+        .send(util.fail(400), '파라미터값이 잘못되었습니다');
+    }
+    data.posts = posts;
+    data.nextStartId = start + offset;
+    return res
+      .status(statusCode.OK)
+      .send(util.success(statusCode.OK, `따미마을 게시물 ${sortedBy}으로 조회 성공`, data))
+  } catch (err) {
+    console.log(err);
+    return res
+      .status(500)
+      .send(util.fail(500, responseMessage.INTERNAL_SERVER_ERROR));
+  }
+}
 
 export const getAuthorSearch = async (req, res) => {
   let {

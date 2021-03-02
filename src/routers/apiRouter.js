@@ -1,5 +1,6 @@
 import express from "express";
 import {
+  getVillage,
   postSearch,
   getSearch,
   getAuthorSearch,
@@ -7,9 +8,10 @@ import {
   postSearchHistory,
   dbCollectionDrop,
 } from "../controllers/apiController";
-import { checkUser } from "../jwtMiddleware";
+import { jwtMiddleware, checkUser } from "../jwtMiddleware";
 const apiRouter = express.Router();
 
+apiRouter.get("/village", jwtMiddleware, getVillage) //따미마을 메인
 apiRouter.get("/author/search", getAuthorSearch);
 apiRouter.post("/author/search", postAuthorSearch);
 apiRouter.post("/search", postSearch);
