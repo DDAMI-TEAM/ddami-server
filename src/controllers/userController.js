@@ -216,17 +216,12 @@ export const postLogin = async (req, res) => {
 };
 
 export const postUpload = async (req, res) => {
-  console.log(req);
   const {
     body: { title, description, hasField },
   } = req;
   try {
     const user = await User.findOne({ userId: req.decoded.userId });
-    const fileUrl = [];
-    if (req.files) {
-      for (var e of req.files)
-        fileUrl.push(`${process.env.BASE_URL}/uploads/${e.filename}`);
-    }
+    const fileUrl = req.files.map(file => file.location);
     const piece = await Piece({
       fileUrl,
       title,
@@ -238,16 +233,22 @@ export const postUpload = async (req, res) => {
       if (!err) {
         user.myPieces.push(piece._id);
         user.save((err) => {
-          if (err) res.json({ result: 0, message: "db error" });
-        });
-        res
-          .status(201)
-          .json({ result: 1, message: "성공적으로 업로드 했습니다." });
+          if (err) {
+            return res
+              .status(500)
+              .send(util.fail(500, responseMessage.INTERNAL_SERVER_ERROR));
+          }
+          return res
+            .status(201)
+            .send(util.success(201, '업로드 성공'));
+        }
       }
     });
   } catch (e) {
     console.log(e);
-    res.status(500).json({ result: 0, message: "db오류" });
+    return res
+      .status(statusCode.INTERNAL_SERVER_ERROR)
+      .send(util.fail(statusCode.INTERNAL_SERVER_ERROR, responseMessage.INTERNAL_SERVER_ERROR));
   }
 };
 
