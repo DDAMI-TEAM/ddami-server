@@ -70,13 +70,10 @@ export const postJoin = async (req, res) => {
       userId,
       userPassword,
       userName,
-      userSex,
-      userBirth,
       userPhone,
-      likeField,
     },
   } = req;
-  if (!userId || !userPassword || !userName || !userSex || !userBirth || !userPhone) {
+  if (!userId || !userPassword || !userName || !userPhone) {
     return res
       .status(statusCode.BAD_REQUEST)
       .send(util.fail(statusCode.BAD_REQUEST, responseMessage.NULL_VALUE));
@@ -95,10 +92,7 @@ export const postJoin = async (req, res) => {
         userPassword: hashedPassword,
         salt,
         userName,
-        userSex,
-        userBirth,
         userPhone,
-        likeField,
       });
       await User.create(user);
 
