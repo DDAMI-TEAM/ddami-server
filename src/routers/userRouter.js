@@ -18,7 +18,7 @@ import {
 } from "../controllers/userController";
 
 import { multerImage } from "../multerMiddleware";
-import { jwtMiddleware, checkUser } from "../jwtMiddleware";
+import { jwtMiddleware } from "../jwtMiddleware";
 const userRouter = express.Router();
 
 userRouter.post("/join", postJoin);
@@ -28,25 +28,24 @@ userRouter.get("/detail/:id", postUserDetail);
 userRouter.post("/write/comment/:id", postUploadComment);
 userRouter.post(
   "/upload/piece",
-  checkUser,
+  jwtMiddleware,
   multerImage.array("img", 3),
   postUpload
 );
-userRouter.post("/like/piece/:id", checkUser, addLike);
-userRouter.get("/like/piece/:id", checkUser, addLike);
-userRouter.get("/follow/:id", checkUser, addFollow);
-userRouter.post("/follow/:id", checkUser, addFollow);
-userRouter.post("/like/product/:id", checkUser, addLikeProduct);
+userRouter.post("/like/piece/:id", jwtMiddleware, addLike);
+userRouter.get("/like/piece/:id", jwtMiddleware, addLike);
+userRouter.get("/follow/:id", jwtMiddleware, addFollow);
+userRouter.post("/follow/:id", jwtMiddleware, addFollow);
+userRouter.post("/like/product/:id", jwtMiddleware, addLikeProduct);
 userRouter.post("/checkId", checkUserId);
-userRouter.post("/auth", checkUser, postAuth);
-userRouter.post("/mypieces", checkUser, postMyPieces);
-userRouter.post("/myInfo", checkUser, postMyInfo);
-userRouter.post("/mylikes", checkUser, postMyLikes);
-userRouter.post("/like/products", checkUser, postLikeProducts);
+userRouter.post("/auth", jwtMiddleware, postAuth);
+userRouter.post("/mypieces", jwtMiddleware, postMyPieces);
+userRouter.post("/myInfo", jwtMiddleware, postMyInfo);
+userRouter.post("/mylikes", jwtMiddleware, postMyLikes);
+userRouter.post("/like/products", jwtMiddleware, postLikeProducts);
 // 미대생 인증
 userRouter.post( "/auth/student",
   jwtMiddleware,
-  checkUser,
   multerImage.single("img"),
   authStudent
 );

@@ -7,6 +7,14 @@ import { AllSearch, Searching } from "./productSearchController";
 import { AllSearch2, Searching2 } from "./materialSearchController";
 import { addSearch } from "./apiController";
 
+export const putProductDetail = async (req, res) => {
+  return res;
+};
+
+export const putMaterialDetail = async (req, res) => {
+  return res;
+};
+
 export const uploadPiece = async (req, res) => {
   const {
     body: { pieces, title, price, description, hasField, locationName },
