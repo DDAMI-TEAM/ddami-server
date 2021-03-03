@@ -11,7 +11,7 @@ import apiRouter from "./routers/apiRouter";
 import pieceRouter from "./routers/pieceRouter";
 import shopRouter from "./routers/shopRouter";
 import commentRouter from "./routers/commentRouter";
-
+import cors from "cors";
 //env 설정
 dotenv.config();
 
@@ -24,7 +24,7 @@ app.use(function (req, res, next) {
   res.header("Access-Control-Allow-Methods", "POST, GET");
   next();
 });
-
+app.use(cors());
 app.use("/uploads", express.static("./uploads/images/"));
 
 app.set("/", path.join(__dirname, "/"));
