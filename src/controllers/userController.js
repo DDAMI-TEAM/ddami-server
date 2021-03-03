@@ -229,21 +229,31 @@ export const postUpload = async (req, res) => {
       hasField,
       author: user._id,
     });
-    piece.save((err) => {
+    await piece.save();
       if (!err) {
-        user.myPieces.push(piece._id);
-        user.save((err) => {
+    user.myPieces.push(piece._id);
+    await user.save();
           if (err) {
-            return res
+    return res
               .status(500)
               .send(util.fail(500, responseMessage.INTERNAL_SERVER_ERROR));
           }
           return res
-            .status(201)
-            .send(util.success(201, '업로드 성공'));
-        }
-      }
-    });
+      .status(201)
+      .send(util.success(201, '업로드 성공'));
+    // piece.save((err) => {
+    //   if (err) {
+    //     throw err;
+    //   } else {
+    //     user.myPieces.push(piece._id);
+    //     user.save((err) => {
+    //       if (err) throw err;
+    //       return res
+    //         .status(201)
+    //         .send(util.success(201, '업로드 성공'));
+    //     }
+    //   }
+    // });
   } catch (e) {
     console.log(e);
     return res
