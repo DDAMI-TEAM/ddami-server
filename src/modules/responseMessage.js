@@ -55,8 +55,11 @@ const responseMessage = {
   DELETE_LIKE_FAIL: "게시글 좋아요 취소하기 실패",
   ALREADY_LIKED: '이미 좋아요가 되어 있음',
 
-/** Reports */
-READ_REPORT_SUCCESS: "리포트 조회 성공",
+  /** Student */
+  READ_STUDENT_SUCCESS: "미대생 정보 조회 성공",
+  READ_STUDENT_FAIL: "해당하는 미대생 정보 조회 실패",
+  /** Reports */
+  READ_REPORT_SUCCESS: "리포트 조회 성공",
 
   /* 서버에러 */
   INTERNAL_SERVER_ERROR: "서버 내부 오류",

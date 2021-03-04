@@ -230,15 +230,9 @@ export const postUpload = async (req, res) => {
       author: user._id,
     });
     await piece.save();
-      if (!err) {
     user.myPieces.push(piece._id);
     await user.save();
-          if (err) {
     return res
-              .status(500)
-              .send(util.fail(500, responseMessage.INTERNAL_SERVER_ERROR));
-          }
-          return res
       .status(201)
       .send(util.success(201, '업로드 성공'));
     // piece.save((err) => {
@@ -398,6 +392,7 @@ export const authStudent = async (req, res) => {
   }
 };
 
+/** 내작업실 [GET] /user/myInfo */
 export const postMyInfo = async (req, res) => {
   const user = await User.findById(req.decoded._id)
     .select(
@@ -412,10 +407,18 @@ export const postMyInfo = async (req, res) => {
     const student = await Student.findOne({ user: user._id }).select(
       "university department"
     );
-    if (student === null) res.json({ result: 1, mypieces: user.myPieces });
-    else {
-      obj.student = student.toObject();
-      res.json({ result: 1, myInfo: obj });
+    // if (student === null) res.json({ result: 1, mypieces: user.myPieces });
+    if (!student){
+      return res
+        .status(statusCode.FORBIDDEN)
+        .send(util.fail(statusCode.FORBIDDEN, responseMessage.READ_STUDENT_FAIL));
+    } else {
+      console.log(student); // dev
+      obj.student = student.toObject(); 
+      console.log(obj.student); //dev
+      return res
+        .status(statusCode.OK)
+        .send(util.success(statusCode.OK, '내 작업실 조회 성공', obj));
     }
   }
 };

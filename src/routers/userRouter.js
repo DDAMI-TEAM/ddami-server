@@ -40,7 +40,7 @@ userRouter.post("/like/product/:id", jwtMiddleware, addLikeProduct);
 userRouter.post("/checkId", checkUserId);
 userRouter.post("/auth", jwtMiddleware, postAuth);
 userRouter.post("/mypieces", jwtMiddleware, postMyPieces);
-userRouter.post("/myInfo", jwtMiddleware, postMyInfo);
+userRouter.get("/myInfo", jwtMiddleware, postMyInfo);
 userRouter.post("/mylikes", jwtMiddleware, postMyLikes);
 userRouter.post("/like/products", jwtMiddleware, postLikeProducts);
 // 미대생 인증
