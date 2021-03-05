@@ -394,32 +394,45 @@ export const authStudent = async (req, res) => {
 
 /** 내작업실 [GET] /user/myInfo */
 export const postMyInfo = async (req, res) => {
-  const user = await User.findById(req.decoded._id)
-    .select(
-      "userId userName imageUrl myPieces likeField follow followerCount state"
-    )
-    .populate({ path: "myPieces", select: "fileUrl" });
-  if (user === null)
-    res.json({ result: 0, message: "없어진 계정이거나 없는 계정입니다." });
-  else {
-    let obj = user.toObject();
-    obj.follow = obj.follow.length;
-    const student = await Student.findOne({ user: user._id }).select(
-      "university department"
-    );
-    // if (student === null) res.json({ result: 1, mypieces: user.myPieces });
-    if (!student){
-      return res
-        .status(statusCode.FORBIDDEN)
-        .send(util.fail(statusCode.FORBIDDEN, responseMessage.READ_STUDENT_FAIL));
+  try {
+    const user = await User.findById(req.decoded._id)
+                            .select("userId userName imageUrl myPieces likeField follow followerCount")
+                            .populate({ path: "myPieces", select: "fileUrl" });
+    if (!user) {
+      return res.status(401).send(util.fail(401, '토큰의 사용자가 유효하지 않습니다.'));
     } else {
-      console.log(student); // dev
-      obj.student = student.toObject(); 
-      console.log(obj.student); //dev
-      return res
-        .status(statusCode.OK)
-        .send(util.success(statusCode.OK, '내 작업실 조회 성공', obj));
+      let obj = user.toObject();
+      obj.follow = obj.follow.length;
+      delete obj._id;
+      obj.myPieces.forEach(p => {
+        p.fileUrl = p.fileUrl[0];
+      })
+      const student = await Student.findOne({ user: user._id }).select(
+        "university department"
+      );
+      // if (student === null) res.json({ result: 1, mypieces: user.myPieces });
+      if (!student){
+        return res
+          .status(statusCode.FORBIDDEN)
+          .send(util.fail(statusCode.FORBIDDEN, responseMessage.READ_STUDENT_FAIL));
+      } else {
+        console.log(typeof(student));
+        obj.student = student.toObject();
+        delete obj.student._id;
+        for(let key in obj.student){
+          obj[key] = obj.student[key];
+        }
+        delete obj.student;
+        return res
+          .status(statusCode.OK)
+          .send(util.success(statusCode.OK, '내 작업실 조회 성공', obj));
+      }
     }
+  } catch (err) {
+    console.log(err);
+    return res
+      .status(500)
+      .send(util.success(500, '서버 내부 오류'));
   }
 };
 
