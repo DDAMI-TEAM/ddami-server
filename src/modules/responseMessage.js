@@ -41,7 +41,7 @@ const responseMessage = {
   CREATE_POST_FAIL: "게시글 생성 실패",
   READ_POST_FAIL: "게시글 조회 성공",
   READ_POST_ALL_FAIL: "전체 게시글 조회 실패",
-  READ_POST_SUCCESS: "게시글 조회 실패",
+  READ_POST_SUCCESS: "게시글 조회 성공",
   READ_POST_ALL_SUCCESS: "전체 게시글 조회 성공",
   UPDATE_POST_SUCCESS: "게시글 업데이트 성공",
   UPDATE_POST_FAIL: "게시글 업데이트 실패",

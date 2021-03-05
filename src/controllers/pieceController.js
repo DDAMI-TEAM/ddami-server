@@ -2,7 +2,9 @@ import Piece from "../models/Piece";
 import Comment from "../models/Comment";
 import User from "../models/User";
 import { checkInclude, docToJSON } from "./apiController";
-import userRouter from "../routers/userRouter";
+import util from "../modules/util";
+import statusCode from "../modules/statusCode";
+import responseMessage from "../modules/responseMessage";
 
 export const getPieceDetail = async (req, res) => {
   const {
@@ -12,9 +14,11 @@ export const getPieceDetail = async (req, res) => {
     path: "author",
     select: "userId imageUrl",
   });
-  if (piece == null)
-    res.json({ result: 0, message: "없거나 사라진 작품입니다." });
-  else {
+  if (!piece) {
+    return res
+      .status(statusCode.NOT_FOUND)
+      .send(util.fail(statusCode.NOT_FOUND, responseMessage.READ_POST_FAIL));
+  } else {
     let obj = piece.toObject();
 
     obj = await Comment.populate(obj, {
@@ -28,6 +32,8 @@ export const getPieceDetail = async (req, res) => {
 
     obj.comments = commentsInfo;
     obj.likeByUser = checkInclude(piece.like, req);
-    res.json({ result: 1, piece: obj });
+    return res
+      .status(statusCode.OK)
+      .send(util.success(statusCode.OK, responseMessage.READ_POST_SUCCESS, obj));
   }
 };
