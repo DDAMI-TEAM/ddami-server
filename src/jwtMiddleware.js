@@ -3,14 +3,17 @@ import dotenv from "dotenv";
 import Piece from "./models/Piece";
 import Product from "./models/Product";
 import Material from "./models/Material";
+import util from "./modules/util"
 dotenv.config();
 
 
 export const jwtMiddleware = async (req, res, next) => {
   const token =
     req.headers["x-access-token"] || req.query.token || req.body.token;
-  if (!token || token === "") {
-    next();
+  if (!token) {
+    return res
+      .status(401)
+      .send(util.fail(401, 'token이 없습니다.'));
   } else {
     await jwt.verify(token, process.env.SECRET, (err, decoded) => {
       if (!err) {
@@ -18,7 +21,7 @@ export const jwtMiddleware = async (req, res, next) => {
         console.log("세션 로그인 성공");
         next();
       } else {
-        res.status(403).json({
+        res.status(401).json({
           result: 0,
           message: "Token error. 다시 로그인 해주세요.",
         });
