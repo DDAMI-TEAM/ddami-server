@@ -10,15 +10,21 @@ import {
   getProductDetail,
   getMaterialDetail,
   putProductDetail,
-  putMaterialDetail
+  putMaterialDetail,
+  getPreProducts,
+  getPreProductImages,
+  postNewProduct
 } from "../controllers/shopController";
 const shopRouter = express.Router();
 
 /** Product */
 // create
-shopRouter.post("/upload/piece", jwtMiddleware, uploadPiece);
+shopRouter.post("/upload/product", jwtMiddleware, postNewProduct); //제 api입니다.
+shopRouter.post("/upload/piece", jwtMiddleware, uploadPiece); //기존 api입니다.
 
 // read
+shopRouter.get("/my-pieces/pre", jwtMiddleware, getPreProducts); //내 작업실에 있으면서, 아직 업로드 되지 않은 작품들 읽기
+shopRouter.get("/my-pieces/pre/images/:id",getPreProductImages);
 shopRouter.post("/search/product", searchProduct); //따미샵에 올라온 Piece를 Product라고 한다.
 shopRouter.get("/detail/product/:id", getProductDetail);
 

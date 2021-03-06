@@ -6,6 +6,10 @@ import { converter } from "../university";
 import { AllSearch, Searching } from "./productSearchController";
 import { AllSearch2, Searching2 } from "./materialSearchController";
 import { addSearch } from "./apiController";
+import statusCode from "../modules/statusCode";
+import util from "../modules/util";
+import responseMessage from "../modules/responseMessage";
+
 
 export const putProductDetail = async (req, res) => {
   return res;
@@ -15,6 +19,83 @@ export const putMaterialDetail = async (req, res) => {
   return res;
 };
 
+/** [GET] /shop/my-pieces/pre */
+export const getPreProducts = async (req, res) => {
+  try {
+    const user = await User.find({id: req.decoded._id });
+    if (!user.state) {
+      return res
+        .status(statusCode.OK)
+        .send(util.success(statusCode.OK, '일반 회원은 작품 등록이 불가능합니다.'));
+    }
+    const pieces = await Piece.find({ userId: req.decoded._id }).select("id fileUrl");
+    // dev: 여기에 select 조건을 추가해야하나..? (상태에 따라서 선택할 수 있는지 없는 지 모르겠음)
+    pieces.forEach(e => {
+      e.fileUrl = e.fileUrl[0];
+    });
+    return res
+      .status(statusCode.OK)
+      .send(util.success(statusCode.OK, '작품 피드 조회 성공', pieces));
+  } catch(err) {
+    console.log(err);
+    return res
+      .status(statusCode.INTERNAL_SERVER_ERROR)
+      .send(util.fail(statusCode.INTERNAL_SERVER_ERROR, responseMessage.INTERNAL_SERVER_ERROR));
+  }
+}
+
+/** [GET] /shop/my-pieces/pre/images/:id */
+export const getPreProductImages = async (req, res) => {
+  const { pieceId } = req.param;
+  try {
+    const pResult = await Piece.find({id: pieceId}).select("fileUrl");
+    const data = {};
+    data.piecdId = pieceId;
+    data.fileUrls = pResult.fileUrl;
+    return res
+      .status(statusCode.OK)
+      .send(util.success(statusCode.OK, '선택 피드의 모든 사진 조회 성공', data))
+  } catch(err) {
+    console.log(err);
+    return res
+      .status(500)
+      .send(util.fail(500, responseMessage.INTERNAL_SERVER_ERROR));
+  }
+}
+
+/** [POST] /shop/upload/product */
+export const postNewProduct = async (req, res) => {
+  // 내가 이해한 바로는 작품 자체에는 상태가 없어도 된다. 그냥 이미지만 가져오면 됨
+  const { fileUrls, title, price, description, hasField, locationName } = req.body;
+  if(!title || !price || !locationName) {
+    return res
+      .status(statusCode.BAD_REQUEST)
+      .send(util.fail(statusCode.BAD_REQUEST, responseMessage.NULL_VALUE));
+  }
+  try {
+    const newProduct = await Product({ 
+      author: req.decoded._id,
+      fileUrls, 
+      title, 
+      price, 
+      description, 
+      hasField, 
+      locationName,
+      location: converter(locationName)
+    });
+    const uploadedProduct = await Product.create(newProduct);
+    const data = {};
+    data.uploadedProductId = uploadedProduct.id;
+    return res
+      .status(statusCode.OK)
+      .send(util.success(statusCode.OK, '따미샵 상품 업로드 성공', data));
+  } catch(err) {
+    console.log(err);
+    return res
+      .status(statusCode.INTERNAL_SERVER_ERROR)
+      .send(util.fail(statusCode.INTERNAL_SERVER_ERROR, responseMessage.INTERNAL_SERVER_ERROR));
+  }
+}
 export const uploadPiece = async (req, res) => {
   const {
     body: { pieces, title, price, description, hasField, locationName },
@@ -42,6 +123,7 @@ export const uploadPiece = async (req, res) => {
         location: converter(locationName),
       });
       await Product.create(product);
+      // 작품의 상태를 판매중으로 바꾸는 과정이 왜 필요하지...
       for (const e of pieces) {
         await Piece.findByIdAndUpdate(e, { state: 1 }, (err) => {
           if (err) {
