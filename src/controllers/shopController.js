@@ -21,6 +21,11 @@ export const putMaterialDetail = async (req, res) => {
 
 /** [GET] /shop/my-pieces/pre */
 export const getPreProducts = async (req, res) => {
+  if (!req.decoded) {
+    return res
+      .status(statusCode.BAD_REQUEST)
+      .send(util.fail(statusCode.BAD_REQUEST, '토큰 값이 없습니다'));
+  }
   try {
     const user = await User.find({id: req.decoded._id });
     if (!user.state) {

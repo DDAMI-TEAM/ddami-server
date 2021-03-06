@@ -44,6 +44,12 @@ export const checkUserId = async (req, res) => {
   }
 };
 export const postAuth = async (req, res) => {
+  if(!req.decoded) {
+    console.log('토큰 값이 없습니다.');
+    return res
+      .status(statusCode.BAD_REQUEST)
+      .send(util.fail(statusCode.BAD_REQUEST, '토큰 값이 없습니다.'));
+  }
   const user = await User.findById(req.decoded._id).select(
     "imageUrl userName state"
   );
@@ -219,6 +225,12 @@ export const postUpload = async (req, res) => {
   const {
     body: { title, description, hasField },
   } = req;
+  if(!req.decoded) {
+    console.log('토큰 값이 없습니다.');
+    return res
+      .status(statusCode.BAD_REQUEST)
+      .send(util.fail(statusCode.BAD_REQUEST, '토큰 값이 없습니다.'));
+  }
   try {
     const user = await User.findOne({ userId: req.decoded.userId });
     const fileUrl = req.files.map(file => file.location);
@@ -296,6 +308,12 @@ export const addLike = async (req, res) => {
   if (piece == null)
     res.status(404).json({ result: 0, message: "사라지거나 없는 작품입니다." });
   else {
+    if(!req.decoded) {
+      console.log('토큰 값이 없습니다.');
+      return res
+        .status(statusCode.BAD_REQUEST)
+        .send(util.fail(statusCode.BAD_REQUEST, '토큰 값이 없습니다.'));
+    }
     try {
       const user = await User.findById(req.decoded._id);
       const pos = user.like.indexOf(id);
@@ -328,6 +346,12 @@ export const addLike = async (req, res) => {
 };
 
 export const postMyPieces = async (req, res) => {
+  if(!req.decoded) {
+    console.log('토큰 값이 없습니다.');
+    return res
+      .status(statusCode.BAD_REQUEST)
+      .send(util.fail(statusCode.BAD_REQUEST, '토큰 값이 없습니다.'));
+  }
   const user = await User.findById(req.decoded._id)
     .select("myPieces")
     .populate({ path: "myPieces", select: "fileUrl state" });
@@ -344,7 +368,7 @@ export const authStudent = async (req, res) => {
   } = req;
   //학생증 업로드 후 경로 가져오기
   const imageUrl = req.file.location || "";
-  if (!university || !department || !number || !imageUrl) {
+  if (!university || !department || !number || !imageUrl || !req.decoded) {
     console.log('필요한 값이 없습니다.');
     return res
       .status(statusCode.BAD_REQUEST)
@@ -395,6 +419,12 @@ export const authStudent = async (req, res) => {
 /** 내작업실 [GET] /user/myInfo */
 export const postMyInfo = async (req, res) => {
   try {
+    if(!req.decoded) {
+      console.log('토큰 값이 없습니다.');
+      return res
+        .status(statusCode.BAD_REQUEST)
+        .send(util.fail(statusCode.BAD_REQUEST, '토큰 값이 없습니다.'));
+    }
     const user = await User.findById(req.decoded._id)
                             .select("userId userName imageUrl myPieces likeField follow followerCount")
                             .populate({ path: "myPieces", select: "fileUrl" });
@@ -437,6 +467,12 @@ export const postMyInfo = async (req, res) => {
 };
 
 export const postMyLikes = async (req, res) => {
+  if(!req.decoded) {
+    console.log('토큰 값이 없습니다.');
+    return res
+      .status(statusCode.BAD_REQUEST)
+      .send(util.fail(statusCode.BAD_REQUEST, '토큰 값이 없습니다.'));
+  }
   const user = await User.findById(req.decoded._id)
     .select("like")
     .populate({ path: "like", select: "title fileUrl author" });
@@ -456,6 +492,12 @@ export const postMyLikes = async (req, res) => {
 };
 
 export const postLikeProducts = async (req, res) => {
+  if(!req.decoded) {
+    console.log('토큰 값이 없습니다.');
+    return res
+      .status(statusCode.BAD_REQUEST)
+      .send(util.fail(statusCode.BAD_REQUEST, '토큰 값이 없습니다.'));
+  }
   const user = await User.findById(req.decoded._id)
     .select("likeProduct likeMaterial")
     .populate({
@@ -495,6 +537,12 @@ export const addLikeProduct = async (req, res) => {
   const {
     params: { id },
   } = req;
+  if(!req.decoded) {
+    console.log('토큰 값이 없습니다.');
+    return res
+      .status(statusCode.BAD_REQUEST)
+      .send(util.fail(statusCode.BAD_REQUEST, '토큰 값이 없습니다.'));
+  }
   const user = await User.findById(req.decoded._id);
   const product = await Product.findOne({ _id: id });
   if (product == null) {
@@ -574,6 +622,12 @@ export const addFollow = async (req, res) => {
       .json({ result: 0, message: "사라지거나 없는 사용자입니다." });
   else {
     try {
+      if(!req.decoded) {
+        console.log('토큰 값이 없습니다.');
+        return res
+          .status(statusCode.BAD_REQUEST)
+          .send(util.fail(statusCode.BAD_REQUEST, '토큰 값이 없습니다.'));
+      }
       const user = await User.findById(req.decoded._id);
       const pos = user.follow.indexOf(id);
 
@@ -612,7 +666,12 @@ export const postUploadComment = async (req, res) => {
   const {
     body: { content },
   } = req;
-
+  if(!req.decoded) {
+    console.log('토큰 값이 없습니다.');
+    return res
+      .status(statusCode.BAD_REQUEST)
+      .send(util.fail(statusCode.BAD_REQUEST, '토큰 값이 없습니다.'));
+  }
   const piece = await Piece.findById(id);
   try {
     if (piece == null) {
