@@ -365,11 +365,8 @@ export const getUserDetail = async (req, res) => {
 };
 
 export const addLike = async (req, res) => {
-  console.log(req);
-  const {
-    params: { id },
-  } = req;
-  const piece = await Piece.findOne({ _id: id });
+  const { pieceId } = req.params;
+  const piece = await Piece.findOne({ _id: pieceId });
   if (piece == null)
     res.status(404).json({ result: 0, message: "사라지거나 없는 작품입니다." });
   else {
@@ -381,7 +378,7 @@ export const addLike = async (req, res) => {
     }
     try {
       const user = await User.findById(req.decoded._id);
-      const pos = user.like.indexOf(id);
+      const pos = user.like.indexOf(pieceId);
 
       if (pos != -1) {
         piece.like.splice(piece.like.indexOf(req.decoded._id), 1);
@@ -392,20 +389,23 @@ export const addLike = async (req, res) => {
           user.like.splice(pos, 1);
           user.save();
         });
-        res.json({ result: 1, message: "좋아요 취소" });
+        return res.status(statusCode.OK).send(util.success(statusCode.OK, '좋아요 취소 성공'));
       } else {
         piece.like.push(req.decoded._id);
         piece.likeCount++;
         piece.save((err) => {
           if (err) {
           }
-          user.like.push(id);
+          user.like.push(pieceId);
           user.save();
         });
-        res.json({ result: 1, message: "좋아요 성공" });
+        return res.status(statusCode.OK).send(util.success(statusCode.OK, '좋아요 등록 성공'));
       }
     } catch (err) {
-      res.status(500).json({ result: 0, message: "DB 오류" });
+      console.log(err);
+      return res
+        .status(statusCode.INTERNAL_SERVER_ERROR)
+        .send(util.fail(statusCode.INTERNAL_SERVER_ERROR, responseMessage.INTERNAL_SERVER_ERROR));
     }
   }
 };
@@ -481,7 +481,7 @@ export const authStudent = async (req, res) => {
   }
 };
 
-/** 내작업실 [GET] /user/myInfo */
+/** 내작업실 [GET] /user/atelier/:id */
 export const getAtelier = async (req, res) => {
   try {
     const { userId } = req.params;
