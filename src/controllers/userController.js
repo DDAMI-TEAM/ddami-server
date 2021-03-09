@@ -558,7 +558,7 @@ export const getLikePieces = async (req, res) => {
   }
 };
 
-export const postLikeProducts = async (req, res) => {
+export const getLikeProducts = async (req, res) => {
   if(!req.decoded) {
     console.log('토큰 값이 없습니다.');
     return res
