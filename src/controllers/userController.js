@@ -268,7 +268,72 @@ export const postUpload = async (req, res) => {
   }
 };
 
-export const postUserDetail = async (req, res) => {
+/** [GET] /user/myInfo */
+export const getMyInfo = async (req, res) => {
+  const _id = req.decoded._id;
+  if (!_id) {
+    console.log('req.decoded._id가 없습니다');
+    return res
+      .status(statusCode.BAD_REQUEST)
+      .send(util.fail(statusCode.BAD_REQUEST, responseMessage.NULL_VALUE));
+  }
+  try {
+    const user = await User.findOne({ _id }).select('userName imageUrl');
+    console.log(user);
+    const student = await Student.findOne({ user: _id });
+    const data = {};
+    data.userName = user.userName;
+    data.imageUrl = user.imageUrl;
+    data.department = student.department;
+    data.likeField = student.likeField;
+    data.stateMessage = student.stateMessage;
+    return res
+      .status(statusCode.OK)
+      .send(util.success(statusCode.OK, '내 프로필(미대생) 불러오기 성공', data));
+  } catch(err) {
+    console.log(err)
+    return res
+      .status(statusCode(INTERNAL_SERVER_ERROR))
+      .send(util.fail(statusCode.INTERNAL_SERVER_ERROR, repsonseMessage.INTERNAL_SERVER_ERROR));
+  }
+}
+export const putMyInfo = async (req, res) => {
+  const id = req.decoded._id;
+  const { stateMessage, likeField } = req.body;
+  const imageUrl = req.file.location;
+  if (!id) {
+    console.log('req.decoded._id가 없습니다');
+    return res
+      .status(statusCode.BAD_REQUEST)
+      .send(util.fail(statusCode.BAD_REQUEST, responseMessage.NULL_VALUE));
+  }
+  try {
+    const student = await Student.findOne({ user: id })
+    if (!student) {
+      console.log('Student 객체가 NULL입니다.');
+      return res
+        .status(statusCode.NOT_FOUND)
+        .send(util.fail(statusCode.NOT_FOUND, responseMessage.NO_USER))
+    }
+    student.stateMessage = stateMessage;
+    student.likeField = likeField;
+    const user = await User.findOne({ _id: id });
+    user.imageUrl = imageUrl;
+    await student.save();
+    await user.save();
+    return res
+      .status(statusCode.OK)
+      .send(util.success(statusCode.OK, '미대생 정보 수정 성공'));
+  }catch(err){
+    console.log(err);
+    return res
+      .status(statusCode.INTERNAL_SERVER_ERROR)
+      .send(util.fail(statusCode.INTERNAL_SERVER_ERROR, responseMessage.INTERNAL_SERVER_ERROR));
+  }
+}
+
+// 머야...
+export const getUserDetail = async (req, res) => {
   const {
     params: { id },
   } = req;
