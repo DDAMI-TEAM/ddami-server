@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 import moment from "moment";
 const PieceSchema = new mongoose.Schema(
   {
-    fileUrl: [{ type: String }],
+    fileUrl: [{ type: String }], //이미지 url 저장
     title: { type: String },
     description: { type: String },
     comments: [{ type: mongoose.Schema.Types.ObjectId, ref: "Comment" }],
@@ -11,7 +11,7 @@ const PieceSchema = new mongoose.Schema(
     views: { type: Number, default: 0 },
     like: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
     likeCount: { type: Number, default: 0 },
-    state: { type: Number, default: 0, enum: [1, 0, -1] },
+    state: { type: Number, default: 0, enum: [1, 0] }, // 0: 작품샵에 없음, 1: 작품샵에 올라가있음
     created: {
       type: Date,
       default: Date.now,

@@ -32,7 +32,7 @@
 - 관련 분야
 - 조회수
 - 좋아요
-- 상태 (거래 대기, 중, 완료)
+- 상태 (샵에 업로드 가능/불가능)
 - 생성 날짜
 
 ## 댓글
@@ -45,7 +45,22 @@
 
 - 검색어
 
-# 작품 샾
+# 작품 샾 (Product)
+
+- pieces: ObjectId, ref: Piece
+- title
+- description
+- price
+- locationName
+- location: x좌표, y좌표
+- author
+- hasField
+- views
+- like: 좋아요한 유저 ObjectId, ref: User
+- likeCount
+- state: enum:[-1(거래 대기), 0(거래 중), 1(거래 완료)], 
+- crated: createdAt Date
+- id
 
 # 재료 샾
 
