@@ -533,7 +533,7 @@ export const getAtelier = async (req, res) => {
   }
 };
 
-export const postMyLikes = async (req, res) => {
+export const getLikePieces = async (req, res) => {
   if(!req.decoded) {
     console.log('토큰 값이 없습니다.');
     return res
@@ -678,11 +678,46 @@ export const addLikeProduct = async (req, res) => {
   }
 };
 
-export const addFollow = async (req, res) => {
+/** [GET] /user/follow/:id */
+export const getFollow = async (req, res) => {
+  const { userId } = req.params;
+  try {
+    const user = await User.findOne({ userId }).select('follow').populate('follow', 'userName userId state imageUrl');
+    console.log(user);
+    return res
+      .status(statusCode.OK)
+      .send(util.success(statusCode.OK, '팔로잉 목록 조회 성공', user));
+  } catch (err) {
+    console.log(err);
+    return res
+      .status(statusCode.INTERNAL_SERVER_ERROR)
+      .send(util.fail(statusCode.INTERNAL_SERVER_ERROR, responseMessage.INTERNAL_SERVER_ERROR));
+  }
+}
+
+export const getFollower = async (req, res) => {
+  const { userId } = req.params;
+  try {
+    const user = await User.findOne({ userId }).select('follower').populate('follower', 'userName userId state imageUrl');
+    console.log(user);
+    return res
+      .status(statusCode.OK)
+      .send(util.success(statusCode.OK, '팔로워 목록 조회 성공', user));
+  } catch (err) {
+    console.log(err);
+    return res
+      .status(statusCode.INTERNAL_SERVER_ERROR)
+      .send(util.fail(statusCode.INTERNAL_SERVER_ERROR, responseMessage.INTERNAL_SERVER_ERROR));
+  }
+}
+
+/** [PUT] /user/follow/:id */
+export const putFollow = async (req, res) => {
   const {
-    params: { id },
+    params: { userId },
   } = req;
-  const follower = await User.findOne({ _id: id });
+  console.log(userId);
+  const follower = await User.findOne({ userId });
   if (follower == null)
     res
       .status(404)
@@ -696,7 +731,7 @@ export const addFollow = async (req, res) => {
           .send(util.fail(statusCode.BAD_REQUEST, '토큰 값이 없습니다.'));
       }
       const user = await User.findById(req.decoded._id);
-      const pos = user.follow.indexOf(id);
+      const pos = user.follow.indexOf(follower._id);
 
       if (pos != -1) {
         follower.follower.splice(follower.follow.indexOf(req.decoded._id), 1);
@@ -715,7 +750,7 @@ export const addFollow = async (req, res) => {
         follower.save((err) => {
           if (err) {
           }
-          user.follow.push(id);
+          user.follow.push(follower._id);
           user.save();
         });
         res.json({ result: 1, message: "팔로우 성공" });
