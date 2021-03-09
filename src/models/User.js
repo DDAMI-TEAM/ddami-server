@@ -18,10 +18,6 @@ const UserSchema = new mongoose.Schema({
     type: String,
     default: "https://ddami.s3.ap-northeast-2.amazonaws.com/default.jpg",
   },
-  stateMessage: {
-    type: String,
-    default: `안녕하세요 만나서 반가워요`,
-  },
   created: {
     type: Date,
     default: Date.now,
