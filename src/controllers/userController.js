@@ -482,15 +482,16 @@ export const authStudent = async (req, res) => {
 };
 
 /** 내작업실 [GET] /user/myInfo */
-export const postMyInfo = async (req, res) => {
+export const getAtelier = async (req, res) => {
   try {
+    const { userId } = req.params;
     if(!req.decoded) {
       console.log('토큰 값이 없습니다.');
       return res
         .status(statusCode.BAD_REQUEST)
         .send(util.fail(statusCode.BAD_REQUEST, '토큰 값이 없습니다.'));
     }
-    const user = await User.findById(req.decoded._id)
+    const user = await User.findById({ userId: userId })
                             .select("userId userName imageUrl myPieces likeField follow followerCount")
                             .populate({ path: "myPieces", select: "fileUrl" });
     if (!user) {
@@ -518,6 +519,7 @@ export const postMyInfo = async (req, res) => {
           obj[key] = obj.student[key];
         }
         delete obj.student;
+        obj.isSelf = (req.decoded.userId === userId) ? true : false;
         return res
           .status(statusCode.OK)
           .send(util.success(statusCode.OK, '내 작업실 조회 성공', obj));
