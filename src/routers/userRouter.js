@@ -3,18 +3,22 @@ import {
   postJoin,
   postLogin,
   postUpload,
-  postUserDetail,
+  getUserDetail,
   addLike,
   checkUserId,
   postAuth,
   postMyPieces,
   authStudent,
-  postMyInfo,
-  postMyLikes,
-  postLikeProducts,
+  getMyInfo,
+  putMyInfo,
+  getLikePieces,
+  getLikeProducts,
   addLikeProduct,
-  addFollow,
+  putFollow,
   postUploadComment,
+  getAtelier,
+  getFollow,
+  getFollower
 } from "../controllers/userController";
 
 import { multerImage } from "../multerMiddleware";
@@ -23,8 +27,8 @@ const userRouter = express.Router();
 
 userRouter.post("/join", postJoin);
 userRouter.post("/login", jwtMiddleware, postLogin);
-userRouter.post("/detail/:id", postUserDetail);
-userRouter.get("/detail/:id", postUserDetail);
+
+
 userRouter.post("/write/comment/:id", postUploadComment);
 userRouter.post(
   "/upload/piece",
@@ -32,17 +36,26 @@ userRouter.post(
   multerImage.array("img", 3),
   postUpload
 );
-userRouter.post("/like/piece/:id", jwtMiddleware, addLike);
-userRouter.get("/like/piece/:id", jwtMiddleware, addLike);
-userRouter.get("/follow/:id", jwtMiddleware, addFollow);
-userRouter.post("/follow/:id", jwtMiddleware, addFollow);
+userRouter.post("/like/piece/:pieceId", jwtMiddleware, addLike);
+// userRouter.get("/like/piece/:id", jwtMiddleware, addLike);
+// userRouter.get("/follow/:id", jwtMiddleware, addFollow);
+
+
 userRouter.post("/like/product/:id", jwtMiddleware, addLikeProduct);
 userRouter.post("/checkId", checkUserId);
 userRouter.post("/auth", jwtMiddleware, postAuth);
 userRouter.post("/mypieces", jwtMiddleware, postMyPieces);
-userRouter.get("/myInfo", jwtMiddleware, postMyInfo);
-userRouter.post("/mylikes", jwtMiddleware, postMyLikes);
-userRouter.post("/like/products", jwtMiddleware, postLikeProducts);
+
+// userRouter.get("/detail/:id", jwtMiddleware, getUserDetail); // 원래 작업실 정보 가져다주는 api
+userRouter.get("/atelier/:id", jwtMiddleware, getAtelier); // 작업실 정보 가져다 주기.
+userRouter.get("/myInfo", jwtMiddleware, getMyInfo);
+userRouter.put("/myInfo", jwtMiddleware, multerImage.single("img"), putMyInfo); //프로필 수정
+userRouter.put("/:userId/follow", jwtMiddleware, putFollow); //팔로우 수정
+
+userRouter.get('/:userId/following', getFollow);
+userRouter.get('/:userId/follower', getFollower);
+userRouter.get("/like/pieces", jwtMiddleware, getLikePieces);
+userRouter.get("/like/products", jwtMiddleware, getLikeProducts);
 // 미대생 인증
 userRouter.post( "/auth/student",
   jwtMiddleware,
