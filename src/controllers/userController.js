@@ -276,20 +276,25 @@ export const postUpload = async (req, res) => {
 
 /** [GET] /user/myInfo */
 export const getMyInfo = async (req, res) => {
-  const _id = req.decoded._id;
-  if (!_id) {
-    console.log('req.decoded._id가 없습니다');
+  if (!req.decoded) {
+    console.log('req.decoded가 없습니다');
     return res
       .status(statusCode.BAD_REQUEST)
       .send(util.fail(statusCode.BAD_REQUEST, responseMessage.NULL_VALUE));
   }
+  const _id = req.decoded._id;
   try {
-    const user = await User.findOne({ _id }).select('userName imageUrl');
-    console.log(user);
-    const student = await Student.findOne({ user: _id });
+    const user = await User.findOne({ _id }).select('userName imageUrl state');
     const data = {};
     data.userName = user.userName;
     data.imageUrl = user.imageUrl;
+    data.isStudent = user.state;
+    if (!user.state) {
+      return res
+        .status(statusCode.OK)
+        .send(util.success(statusCode.OK, '내 프로필(일반인) 불러오기 성공', data));
+    }
+    const student = await Student.findOne({ user: _id });
     data.department = student.department;
     data.likeField = student.likeField;
     data.stateMessage = student.stateMessage;
@@ -303,28 +308,33 @@ export const getMyInfo = async (req, res) => {
       .send(util.fail(statusCode.INTERNAL_SERVER_ERROR, repsonseMessage.INTERNAL_SERVER_ERROR));
   }
 }
+
+/** [PUT] /user/myInfo */
 export const putMyInfo = async (req, res) => {
-  const id = req.decoded._id;
-  const { stateMessage, likeField } = req.body;
-  const imageUrl = req.file.location;
-  if (!id) {
-    console.log('req.decoded._id가 없습니다');
+  if (!req.decoded) {
+    console.log('req.decoded가 없습니다');
     return res
       .status(statusCode.BAD_REQUEST)
       .send(util.fail(statusCode.BAD_REQUEST, responseMessage.NULL_VALUE));
   }
+  const id = req.decoded._id;
+  const imageUrl = req.file.location;
   try {
-    const student = await Student.findOne({ user: id })
-    if (!student) {
-      console.log('Student 객체가 NULL입니다.');
-      return res
-        .status(statusCode.NOT_FOUND)
-        .send(util.fail(statusCode.NOT_FOUND, responseMessage.NO_USER))
-    }
-    student.stateMessage = stateMessage;
-    student.likeField = likeField;
     const user = await User.findOne({ _id: id });
     user.imageUrl = imageUrl;
+    if (!user.state) {
+      await user.save();
+      return res
+        .status(statusCode.OK)
+        .send(util.success(statusCode.OK, '일반회원 정보 수정 성공'));
+    }
+    const student = await Student.findOne({ user: id })
+    if (!student) {
+      throw new Error('해당 id의 student 객체가 없음');
+    }
+    const { stateMessage, likeField } = req.body;
+    student.stateMessage = stateMessage;
+    student.likeField = likeField; // null 이어도 됨 (관심 분야가 없는 경우)
     await student.save();
     await user.save();
     return res
