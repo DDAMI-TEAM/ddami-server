@@ -233,6 +233,12 @@ export const postUpload = async (req, res) => {
   }
   try {
     const user = await User.findOne({ userId: req.decoded.userId });
+    if (!user.state) {
+      console.log('일반인 작품 업로드 시도');
+      return res
+        .status(statusCode.BAD_REQUEST)
+        .send(util.fail(statusCode.BAD_REQUEST, '미대생 인증을 해주세요'));
+    }
     const fileUrl = req.files.map(file => file.location);
     const piece = await Piece({
       fileUrl,
@@ -512,7 +518,6 @@ export const getAtelier = async (req, res) => {
           .status(statusCode.FORBIDDEN)
           .send(util.fail(statusCode.FORBIDDEN, responseMessage.READ_STUDENT_FAIL));
       } else {
-        console.log(typeof(student));
         obj.student = student.toObject();
         delete obj.student._id;
         for(let key in obj.student){
