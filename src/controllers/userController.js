@@ -318,12 +318,14 @@ export const putMyInfo = async (req, res) => {
       .send(util.fail(statusCode.BAD_REQUEST, responseMessage.NULL_VALUE));
   }
   const id = req.decoded._id;
-  const imageUrl = req.file.location;
   try {
     const user = await User.findOne({ _id: id });
-    user.imageUrl = imageUrl;
-    if (!user.state) {
+    if (req.file) {
+      const imageUrl = req.file.location;
+      user.imageUrl = imageUrl;
       await user.save();
+    }
+    if (!user.state) {
       return res
         .status(statusCode.OK)
         .send(util.success(statusCode.OK, '일반회원 정보 수정 성공'));
@@ -336,7 +338,6 @@ export const putMyInfo = async (req, res) => {
     student.stateMessage = stateMessage;
     student.likeField = likeField; // null 이어도 됨 (관심 분야가 없는 경우)
     await student.save();
-    await user.save();
     return res
       .status(statusCode.OK)
       .send(util.success(statusCode.OK, '미대생 정보 수정 성공'));
@@ -698,7 +699,11 @@ export const getFollow = async (req, res) => {
   const { userId } = req.params;
   try {
     const user = await User.findOne({ userId }).select('follow').populate('follow', 'userName userId state imageUrl');
-    console.log(user);
+    if (!user) {
+      return res
+        .status(statusCode.NOT_FOUND)
+        .send(util.fail(statusCode.NOT_FOUND, '해당 아이디의 사용자가 없습니다.'));
+    }
     return res
       .status(statusCode.OK)
       .send(util.success(statusCode.OK, '팔로잉 목록 조회 성공', user));
@@ -714,7 +719,11 @@ export const getFollower = async (req, res) => {
   const { userId } = req.params;
   try {
     const user = await User.findOne({ userId }).select('follower').populate('follower', 'userName userId state imageUrl');
-    console.log(user);
+    if(!user || !user.state) {
+      return res
+        .status(statusCode.NOT_FOUND)
+        .send(util.fail(statusCode.NOT_FOUND, '해당 아이디의 미대생이 없습니다.'));
+    }
     return res
       .status(statusCode.OK)
       .send(util.success(statusCode.OK, '팔로워 목록 조회 성공', user));
@@ -726,7 +735,7 @@ export const getFollower = async (req, res) => {
   }
 }
 
-/** [PUT] /user/follow/:id */
+/** [PUT] /user/my-following/:userId */
 export const putFollow = async (req, res) => {
   const {
     params: { userId },
@@ -736,7 +745,7 @@ export const putFollow = async (req, res) => {
   if (follower == null)
     res
       .status(404)
-      .json({ result: 0, message: "사라지거나 없는 사용자입니다." });
+      .json({ status: 404, result: 0, message: "사라지거나 없는 사용자입니다." });
   else {
     try {
       if(!req.decoded) {
