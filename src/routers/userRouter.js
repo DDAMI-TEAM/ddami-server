@@ -47,7 +47,7 @@ userRouter.post("/auth", jwtMiddleware, postAuth);
 userRouter.post("/mypieces", jwtMiddleware, postMyPieces);
 
 // userRouter.get("/detail/:id", jwtMiddleware, getUserDetail); // 원래 작업실 정보 가져다주는 api
-userRouter.get("/atelier/:id", jwtMiddleware, getAtelier); // 작업실 정보 가져다 주기.
+userRouter.get("/atelier/:userId", jwtMiddleware, getAtelier); // 작업실 정보 가져다 주기.
 userRouter.get("/myInfo", jwtMiddleware, getMyInfo);
 userRouter.put("/myInfo", jwtMiddleware, multerImage.single("img"), putMyInfo); //프로필 수정
 userRouter.put("/:userId/follow", jwtMiddleware, putFollow); //팔로우 수정
