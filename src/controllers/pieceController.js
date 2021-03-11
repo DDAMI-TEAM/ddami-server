@@ -29,7 +29,13 @@ export const getPieceDetail = async (req, res) => {
       path: "user",
       select: "imageUrl userId userName",
     });
-
+      if (req.decoded) {
+        obj.isMyPiece = piece.author._id == req.decoded._id;
+        obj.login = true;
+      } else {
+        obj.isMyPiece = false;
+        obj.login = false;
+      }
     obj.comments = commentsInfo;
     obj.likeByUser = checkInclude(piece.like, req);
     return res
