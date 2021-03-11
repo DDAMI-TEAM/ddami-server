@@ -3,6 +3,8 @@ import dotenv from "dotenv";
 import Piece from "./models/Piece";
 import Product from "./models/Product";
 import Material from "./models/Material";
+import mongoose from 'mongoose';
+import util from './modules/util';
 dotenv.config();
 
 
@@ -45,6 +47,10 @@ export const checkViewUser = async (req, res, next) => {
     (req.connection.socket ? req.connection.socket.remoteAddress : null);
 
   //해당 게시글에 대한 id가 오브젝트에 없다면 새로 오브젝트 배열을 생성
+  if(!mongoose.Types.ObjectId.isValid(req.params.id)) {
+    return res.status(400).send(util.fail(400, '유효한 작품 아이디가 아닙니다.'));
+  }
+
   if (!loginUser[req.params.id]) {
     loginUser[req.params.id] = [];
   }
