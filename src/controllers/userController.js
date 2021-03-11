@@ -250,9 +250,10 @@ export const postUpload = async (req, res) => {
     await piece.save();
     user.myPieces.push(piece._id);
     await user.save();
+    const piecdId = piece._id;
     return res
       .status(201)
-      .send(util.success(201, '업로드 성공'));
+      .send(util.success(201, '업로드 성공', { piecdId }));
     // piece.save((err) => {
     //   if (err) {
     //     throw err;
