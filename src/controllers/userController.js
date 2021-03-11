@@ -5,10 +5,11 @@ import Product from "../models/Product";
 import Material from "../models/Material";
 import Student from "../models/Student";
 import jwt from "jsonwebtoken";
-import responseMessage from "../modules/responseMessage"
-import statusCode from "../modules/statusCode"
-import util from "../modules/util"
-import crypto from "crypto"
+import mongoose from 'mongoose';
+import responseMessage from "../modules/responseMessage";
+import statusCode from "../modules/statusCode";
+import util from "../modules/util";
+import crypto from "crypto";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -384,9 +385,17 @@ export const getUserDetail = async (req, res) => {
 
 export const addLike = async (req, res) => {
   const { pieceId } = req.params;
+  if (!mongoose.Types.ObjectId.isValid(pieceId)) {
+    console.log('올바르지 않은 작품 id입니다.');
+    return res
+      .status(400)
+      .send(util.fail(400, '올바르지 않은 작품 아이디입니다.'));
+  }
   const piece = await Piece.findOne({ _id: pieceId });
   if (piece == null)
-    res.status(404).json({ result: 0, message: "사라지거나 없는 작품입니다." });
+    return res
+      .status(404)
+      .send(util.fail(404, "존재하지 않는 작품 아이디입니다."));
   else {
     if(!req.decoded) {
       console.log('토큰 값이 없습니다.');
@@ -561,15 +570,15 @@ export const getLikePieces = async (req, res) => {
     .select("like")
     .populate({ path: "like", select: "title fileUrl author" });
   if (user === null)
-    res.json({ result: 0, message: "없어진 계정이거나 없는 계정입니다." });
+    return res.status(statusCode.NOT_FOUND).send(util.fail(statusCode.NOT_FOUND, "없어진 계정이거나 없는 계정입니다."));
   else {
     let obj = user.toObject();
     await User.populate(
       obj.like,
       { path: "author", select: "userId userName" },
       (err, docs) => {
-        if (!err) res.json({ result: 1, likes: docs });
-        else console.log(err);
+        if (!err) res.status(200).json({ status: 200, result: 1, likes: docs });
+        else { console.log(err); return res.status(500).send(util.fail(500, responseMessage.INTERNAL_SERVER_ERROR)); }
       }
     );
   }
