@@ -33,7 +33,7 @@ userRouter.post("/write/comment/:id", postUploadComment);
 userRouter.post(
   "/upload/piece",
   jwtMiddleware,
-  multerImage.array("img", 3),
+  // multerImage.array("img", 3),
   postUpload
 );
 userRouter.post("/like/piece/:pieceId", jwtMiddleware, addLike);
@@ -59,7 +59,7 @@ userRouter.get("/like/products", jwtMiddleware, getLikeProducts);
 // 미대생 인증
 userRouter.post( "/auth/student",
   jwtMiddleware,
-  multerImage.single("img"),
+  // multerImage.single("img"),
   authStudent
 );
 

@@ -10,11 +10,11 @@ dotenv.config();
 
 export const jwtMiddleware = async (req, res, next) => {
   const token =
-    req.headers["x-access-token"] || req.query.token || req.body.token;
+    req.headers["x-access-token"] || req.query.token || req.body?.token || null;
   if (!token) {
     next();
   } else {
-    await jwt.verify(token, process.env.SECRET, (err, decoded) => {
+    await jwt.verify(token, process.env.SECRET || "secret", (err, decoded) => {
       if (!err) {
         req.decoded = decoded;
         console.log("세션 로그인 성공");

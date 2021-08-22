@@ -6,7 +6,7 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-aws.config.loadFromPath(__dirname + '/../config/s3.json');
+// aws.config.loadFromPath(__dirname + '/../config/s3.json');
 
 const s3 = new aws.S3();
 export const multerImage = multer({
@@ -15,7 +15,7 @@ export const multerImage = multer({
     bucket: 'ddami',
     acl: 'public-read',
     key: function (req, file, cb) {
-      cb(null, "uploads/stuAuth/" + Date.now() + '.' + file.originalname.split('.').pop());
+      cb(null, 'uploads/stuAuth/' + Date.now() + '.' + file.originalname.split('.').pop());
     },
   }),
   limits: { fileSize: 5 * 1024 * 1024 },

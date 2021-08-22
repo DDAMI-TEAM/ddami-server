@@ -36,7 +36,7 @@ shopRouter.put("/detail/product/:id", jwtMiddleware, putProductDetail);
 //create
 shopRouter.post("/upload/material",
   jwtMiddleware,
-  multerImage.array("img", 3),
+  // multerImage.array("img", 3),
   uploadMaterial
 );
 
