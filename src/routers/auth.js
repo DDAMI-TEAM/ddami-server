@@ -12,7 +12,8 @@ passport.use('kakao', new Strategy({
   try {
     const exUser = await User.findOne({
       where: {
-        kakao_id: profile.id
+        socialType: 'kakao',
+        socialId: profile.id
       }
     })
     if (exUser) {
