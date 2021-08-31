@@ -2,7 +2,7 @@ import Product from "../models/Product";
 import Material from "../models/Material";
 import User from "../models/User";
 import Piece from "../models/Piece";
-import { converter } from "../university";
+// import { converter } from "../university";
 import { AllSearch, Searching } from "./productSearchController";
 import { AllSearch2, Searching2 } from "./materialSearchController";
 import { addSearch } from "./apiController";
@@ -86,7 +86,7 @@ export const postNewProduct = async (req, res) => {
       description, 
       hasField, 
       locationName,
-      location: converter(locationName)
+      //location: converter(locationName)
     });
     const uploadedProduct = await Product.create(newProduct);
     const data = {};
@@ -125,7 +125,7 @@ export const uploadPiece = async (req, res) => {
         author: req.decoded._id,
         hasField,
         locationName,
-        location: converter(locationName),
+        //location: converter(locationName),
       });
       await Product.create(product);
       // 작품의 상태를 판매중으로 바꾸는 과정이 왜 필요하지...
@@ -163,10 +163,13 @@ export const uploadMaterial = async (req, res) => {
 
       if (req.files) {
         if (req.files.length == 0)
-          fileUrl.push(`${process.env.BASE_URL}/uploads/material.jpg`);
+          console.log();
+          //fileUrl.push(`${process.env.BASE_URL}/uploads/material.jpg`);
+
         else {
           for (var e of req.files)
-            fileUrl.push(`${process.env.BASE_URL}/uploads/${e.filename}`);
+            console.log();
+            //fileUrl.push(`${process.env.BASE_URL}/uploads/${e.filename}`);
         }
       }
       const material = await Material({
@@ -177,7 +180,7 @@ export const uploadMaterial = async (req, res) => {
         author: req.decoded._id,
         hasField,
         locationName,
-        location: converter(locationName),
+        // location: converter(locationName),
       });
       await Material.create(material);
 

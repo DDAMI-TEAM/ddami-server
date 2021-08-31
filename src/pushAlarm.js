@@ -1,7 +1,7 @@
 import FCM from "fcm-node";
 import dotenv from "dotenv";
 dotenv.config();
-const serverKey = process.env.FIREBASE_KEY; //put your server key here
+const serverKey = process.env.FIREBASE_KEY || "serverKey"; //put your server key here
 const fcm = new FCM(serverKey);
 
 export const sendMessage = (deviceToken, title, body) => {

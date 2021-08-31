@@ -14,6 +14,8 @@ const UserSchema = new mongoose.Schema({
   like: [{ type: mongoose.Schema.Types.ObjectId, ref: "Piece" }],
   likeProduct: [{ type: mongoose.Schema.Types.ObjectId, ref: "Product" }],
   likeMaterial: [{ type: mongoose.Schema.Types.ObjectId, ref: "Material" }],
+  socialId: {type: String, enum: ["kakao", "google", "naver"]},
+  socialType: String,
   imageUrl: {
     type: String,
     default: "https://ddami.s3.ap-northeast-2.amazonaws.com/default.jpg",

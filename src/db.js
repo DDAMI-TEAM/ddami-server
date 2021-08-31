@@ -1,8 +1,8 @@
 import mongoose from "mongoose";
-import dotenv from "dotenv";
-dotenv.config();
 
-mongoose.connect(process.env.MONGODB_LOCAL_URL, {
+const dbConfig = require('./config/db')
+
+mongoose.connect(dbConfig.mongo_url, {
   useNewUrlParser: true,
   useFindAndModify: false,
 });
